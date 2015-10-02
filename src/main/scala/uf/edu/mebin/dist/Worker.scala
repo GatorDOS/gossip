@@ -39,7 +39,9 @@ class Worker(actorNo: Int) extends Actor {
   def processMessage(algo:Algorithm, msg:PushSumMessage) = {
     if (algo != null) {
         algo.receiveMessage(msg)
-        if(algo.isTerminate()){
+        println("Yahin hain gadbad " + algo.isTerminate)
+        if(algo.isTerminate() == true){
+          println("Bhai band ho ja")
          context.actorSelection(RootActorPath(self.path.address) / "user" / "Boss") ! Stop
         }
         var randomNeighbour = DistibutedApp.networkTopologyInst.getRandomNeighbour(actorNo)

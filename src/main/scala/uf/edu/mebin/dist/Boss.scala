@@ -20,7 +20,7 @@ import akka.actor.PoisonPill
 /**
  * @author mebin
  */
-class Boss(topology: Network, algo: String) extends Actor {
+class Boss(topology: Network, algo: String, noOfNodes:Int) extends Actor {
   var backends = IndexedSeq.empty[ActorRef]
   var firstActor: ActorRef = null
   var jobCounter = 0
@@ -46,11 +46,16 @@ class Boss(topology: Network, algo: String) extends Actor {
         sender() ! GossipMsg
       else
         throw new Exception("Please enter \"push-sum\" or \"gossip\" for algorithm")
-
+      if(backends.length == noOfNodes)
+      {
+        if (algo == "push-sum")
+        	firstActor ! PushSumMessage(0, 0)
+      }
     case Terminated(a) =>
       backends = backends.filterNot(_ == a)
       
-    case Stop => stopAllWorkers
+    case Stop => println("Going to shutdown!!!")
+                 stopAllWorkers
                  context stop self
   }
   
@@ -71,15 +76,7 @@ object Boss {
       withFallback(ConfigFactory.load())
 
     val system = ActorSystem("ClusterSystem", config)
-//    val bossInstance = new Boss(topology, algo)
-    val boss = system.actorOf(Props(new Boss(topology, algo)), name = "Boss")
-//    system.eventStream.subscribe(boss, classOf[DeadLetter])
-    val bossactorRef = boss.actorRef.path
-    if (algo == "push-sum") {
-      //send message ti fust actor
-      while (bossactorRef.backends.length != noOfNodes) {} //wait till all workers register
-      bossactorRef.firstActor ! PushSumMessage(0, 0) //start
-    }
+    val boss = system.actorOf(Props(new Boss(topology, algo, noOfNodes)), name = "Boss")
 
   }
 
