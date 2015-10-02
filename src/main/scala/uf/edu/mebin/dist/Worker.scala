@@ -20,6 +20,7 @@ class Worker(actorNo: Int) extends Actor {
 
   val cluster = Cluster(context.system)
   var algo: Algorithm = null
+  var boss: Member = null
 
   override def preStart(): Unit = cluster.subscribe(self, classOf[MemberUp])
   override def postStop(): Unit = cluster.unsubscribe(self)
@@ -32,28 +33,27 @@ class Worker(actorNo: Int) extends Actor {
       algo = AlgoFactory.getInstance("push-sum", actorNo)
     case GossipMsg =>
       algo = AlgoFactory.getInstance("gossip", actorNo)
-    case msg: PushSumMessage =>processMessage(algo, msg)
-      
+    case msg: PushSumMessage => processMessage(algo, msg)
   }
 
-  def processMessage(algo:Algorithm, msg:PushSumMessage) = {
+  def processMessage(algo: Algorithm, msg: PushSumMessage) = {
     if (algo != null) {
-        algo.receiveMessage(msg)
-        println("Yahin hain gadbad " + algo.isTerminate)
-        if(algo.isTerminate() == true){
-          println("Bhai band ho ja")
-         context.actorSelection(RootActorPath(self.path.address) / "user" / "Boss") ! Stop
-        }
-        var randomNeighbour = DistibutedApp.networkTopologyInst.getRandomNeighbour(actorNo)
-        algo.send(workerActors.actors(randomNeighbour))
-      } 
-    else 
+      algo.receiveMessage(msg)
+      if (algo.isTerminate() == true) {
+        if (boss != null)
+          context.actorSelection(RootActorPath(boss.address) / "user" / "Boss") ! Stop
+      }
+      var randomNeighbour = DistibutedApp.networkTopologyInst.getRandomNeighbour(actorNo)
+      algo.send(workerActors.actors(randomNeighbour))
+    } else
       throw new Exception("Algorithm has not been specified!!!")
   }
-  
+
   def register(member: Member): Unit =
-    if (member.hasRole("Boss"))
+    if (member.hasRole("Boss")) {
+      boss = member
       context.actorSelection(RootActorPath(member.address) / "user" / "Boss") ! BackendRegistration(actorNo)
+    }
 
 }
 
