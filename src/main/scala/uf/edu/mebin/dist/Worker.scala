@@ -1,79 +1,76 @@
 package uf.edu.mebin.dist
 
-import scala.annotation.varargs
+import scala.util.Random
 import com.typesafe.config.ConfigFactory
 import akka.actor.Actor
 import akka.actor.ActorSelection.toScala
 import akka.actor.ActorSystem
 import akka.actor.Props
 import akka.actor.RootActorPath
-import akka.cluster.Cluster
-import akka.cluster.ClusterEvent.CurrentClusterState
-import akka.cluster.ClusterEvent.MemberUp
-import akka.cluster.Member
-import akka.cluster.MemberStatus
 import uf.edu.mebin.algo.AlgoFactory
 import uf.edu.mebin.algo.Algorithm
-import scala.util.Random
+import akka.actor.ActorRef
+import java.io.PrintWriter
+import java.io.File
 
-class Worker(actorNo: Int) extends Actor {
-
-  val cluster = Cluster(context.system)
+class Worker(actorNo: Int, boss: ActorRef) extends Actor {
+  var sent: Boolean = false
   var algo: Algorithm = null
-  var boss: Member = null
   val neighboursArray = DistibutedApp.networkTopologyInst.getListOfNeighbours(actorNo)
 
-  override def preStart(): Unit = cluster.subscribe(self, classOf[MemberUp])
-  override def postStop(): Unit = cluster.unsubscribe(self)
-
   def receive = {
-    case state: CurrentClusterState =>
-      state.members.filter(_.status == MemberStatus.Up) foreach register
-    case MemberUp(m) => register(m)
+
     case PushSumMsg =>
       algo = AlgoFactory.getInstance("push-sum", actorNo)
     case GossipMsg =>
-      
-      println("Worker id is ",actorNo)
+      println("Worker id is ", actorNo)
       println("The neighbours are: ")
       println(neighboursArray)
       println()
       algo = AlgoFactory.getInstance("gossip", actorNo)
-    case msg: Message => processMessage(algo, msg)
+    case msg: Message =>
+      //println("Hey i was called",actorNo)
+      processMessage(algo, msg)
+      if (sent == false) {
+      //println("******************Message Received by worker actor "+actorNo.toString() + "******************")
+       /* val workerResult = new PrintWriter(new File("worker.txt" + actorNo))
+        workerResult.close()*/
+       boss ! MessageReceived(actorNo)
+        sent = true
+      }
+    case workerRegister => boss ! BackendRegistration(actorNo)
   }
 
   def processMessage(algo: Algorithm, msg: Message) = {
     if (algo != null) {
       algo.receiveMessage(msg)
       if (algo.isTerminate() == true) {
+
         if (boss != null)
-          context.actorSelection(RootActorPath(boss.address) / "user" / "Boss") ! Stop
+          boss ! Stop
       }
       var randomNeighbour = getRandomNeighbour(neighboursArray)
-      algo.send(workerActors.actors(randomNeighbour))
+      println("Neighbour selected ",neighboursArray(randomNeighbour))
+      algo.send(workerActors.actors(neighboursArray(randomNeighbour)))
     } else
       throw new Exception("Algorithm has not been specified!!!")
   }
 
   def getRandomNeighbour(neighbours: List[Int]): Int = {
-    val rand = new Random(neighbours.length)
-    rand.nextInt(neighbours.length)
+    val rand = new Random()
+    println(neighbours.length)
+    var rando = rand.nextInt(neighbours.length)
+    println(neighbours)
+    println("The random index selected was ",rando)
+    rando
   }
-  def register(member: Member): Unit =
-    if (member.hasRole("Boss")) {
-      boss = member
-      context.actorSelection(RootActorPath(member.address) / "user" / "Boss") ! BackendRegistration(actorNo)
-    }
 
 }
 
 object Worker {
-  def start(n: Int): Unit = {
-    val config = ConfigFactory.parseString(s"akka.remote.netty.tcp.port=0").
-      withFallback(ConfigFactory.parseString("akka.cluster.roles = [worker]")).
-      withFallback(ConfigFactory.load())
-
-    val system = ActorSystem("ClusterSystem", config)
-    system.actorOf(Props(new Worker(n)), name = "worker")
+  def start(n: Int, boss: ActorRef): Unit = {
+    val system = ActorSystem() //"ClusterSystem", config
+    val workerActor = system.actorOf(Props(new Worker(n, boss)), name = "worker")
+    workerActor ! workerRegister
   }
 }
