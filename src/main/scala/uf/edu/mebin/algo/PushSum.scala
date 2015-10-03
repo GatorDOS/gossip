@@ -3,6 +3,7 @@ package uf.edu.mebin.algo
 import akka.actor.Actor
 import akka.actor.ActorRef
 import uf.edu.mebin.dist.PushSumMessage
+import uf.edu.mebin.dist.Message
 
 /**
  * @author mebin
@@ -19,10 +20,10 @@ class PushSum(actorNo: Int) extends Algorithm {
     actor ! PushSumMessage(s, w)
   }
 
-  def receiveMessage(m: PushSumMessage) = {
-    s += m.s
-    w += m.w
-    //select a random neighbour and send it a message
+  def receiveMessage(m: Message) = {
+    var pushSumMessage = m.asInstanceOf[PushSumMessage]
+    s += pushSumMessage.s
+    w += pushSumMessage.w
   }
 
   def sumEstimate(): BigDecimal = {

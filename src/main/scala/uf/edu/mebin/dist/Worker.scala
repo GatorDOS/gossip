@@ -1,8 +1,10 @@
 package uf.edu.mebin.dist
 
+import scala.annotation.varargs
+
 import com.typesafe.config.ConfigFactory
+
 import akka.actor.Actor
-import akka.actor.ActorRef
 import akka.actor.ActorSelection.toScala
 import akka.actor.ActorSystem
 import akka.actor.Props
@@ -13,7 +15,6 @@ import akka.cluster.ClusterEvent.MemberUp
 import akka.cluster.Member
 import akka.cluster.MemberStatus
 import uf.edu.mebin.algo.AlgoFactory
-import uf.edu.mebin.algo.Algorithm
 import uf.edu.mebin.algo.Algorithm
 
 class Worker(actorNo: Int) extends Actor {
@@ -33,10 +34,10 @@ class Worker(actorNo: Int) extends Actor {
       algo = AlgoFactory.getInstance("push-sum", actorNo)
     case GossipMsg =>
       algo = AlgoFactory.getInstance("gossip", actorNo)
-    case msg: PushSumMessage => processMessage(algo, msg)
+    case msg: Message => processMessage(algo, msg)
   }
 
-  def processMessage(algo: Algorithm, msg: PushSumMessage) = {
+  def processMessage(algo: Algorithm, msg: Message) = {
     if (algo != null) {
       algo.receiveMessage(msg)
       if (algo.isTerminate() == true) {

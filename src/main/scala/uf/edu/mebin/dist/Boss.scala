@@ -20,11 +20,11 @@ import akka.actor.PoisonPill
 /**
  * @author mebin
  */
-class Boss(topology: Network, algo: String, noOfNodes:Int) extends Actor {
+class Boss(topology: Network, algo: String, noOfNodes: Int) extends Actor {
   var backends = IndexedSeq.empty[ActorRef]
   var firstActor: ActorRef = null
   var jobCounter = 0
-
+  var b = 0l
   def receive = {
     case d: DeadLetter => println(d)
     case job: Array[Int] if backends.isEmpty =>
@@ -46,21 +46,25 @@ class Boss(topology: Network, algo: String, noOfNodes:Int) extends Actor {
         sender() ! GossipMsg
       else
         throw new Exception("Please enter \"push-sum\" or \"gossip\" for algorithm")
-      if(backends.length == noOfNodes)
-      {
+      if (backends.length == noOfNodes) {
+        b = System.currentTimeMillis()
         if (algo == "push-sum")
-        	firstActor ! PushSumMessage(0, 0)
+          firstActor ! PushSumMessage(0, 0)
+        else if (algo == "gossip")
+          firstActor ! GossipMessage("fact")
       }
     case Terminated(a) =>
       backends = backends.filterNot(_ == a)
-      
-    case Stop => println("Going to shutdown!!!")
-                 stopAllWorkers
-                 context stop self
+
+    case Stop =>
+      println("Time taken is " + (System.currentTimeMillis() - b))
+      println("Going to shutdown!!!")
+      stopAllWorkers
+      context stop self
   }
-  
+
   def stopAllWorkers() = {
-    for(worker <- workerActors.actors){
+    for (worker <- workerActors.actors) {
       worker ! PoisonPill
     }
   }
@@ -79,5 +83,4 @@ object Boss {
     val boss = system.actorOf(Props(new Boss(topology, algo, noOfNodes)), name = "Boss")
 
   }
-
 }

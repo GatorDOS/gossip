@@ -1,13 +1,13 @@
 package uf.edu.mebin.algo
 
-import uf.edu.mebin.dist.PushSumMessage
 import akka.actor.ActorRef
+import uf.edu.mebin.dist.Message
 
 /**
  * @author mebin
  */
 trait Algorithm {
   def send(actor: ActorRef)
-  def receiveMessage(m: PushSumMessage)
+  def receiveMessage(m: Message)
   def isTerminate():Boolean
 }

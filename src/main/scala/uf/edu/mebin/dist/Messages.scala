@@ -6,7 +6,9 @@ import akka.actor.ActorRef
  * @author mebin
  */
 
-case class PushSumMessage(s: BigDecimal, w:BigDecimal)
+trait Message
+case class PushSumMessage(s: BigDecimal, w:BigDecimal) extends Message
+case class GossipMessage(s: String) extends Message
 case class BackendRegistration(actorNo:Int)
 final case class JobFailed(reason: String, job: Array[Int])
 case object PushSumMsg
