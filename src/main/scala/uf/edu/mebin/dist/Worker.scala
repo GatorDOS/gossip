@@ -33,6 +33,11 @@ class Worker(actorNo: Int) extends Actor {
     case PushSumMsg =>
       algo = AlgoFactory.getInstance("push-sum", actorNo)
     case GossipMsg =>
+      
+      println("Worker id is ",actorNo)
+      println("The neighbours are: ")
+      println(neighboursArray)
+      println()
       algo = AlgoFactory.getInstance("gossip", actorNo)
     case msg: Message => processMessage(algo, msg)
   }
@@ -50,7 +55,7 @@ class Worker(actorNo: Int) extends Actor {
       throw new Exception("Algorithm has not been specified!!!")
   }
 
-  def getRandomNeighbour(neighbours: Array[Int]): Int = {
+  def getRandomNeighbour(neighbours: List[Int]): Int = {
     val rand = new Random(neighbours.length)
     rand.nextInt(neighbours.length)
   }
