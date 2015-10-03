@@ -7,14 +7,15 @@ package uf.edu.mebin.topology
 case class fullNetwork(n: Int) extends Network {
   //NxN matrix to store to whom all it can connect... 
   val connectedNetwork = Array.ofDim[Boolean](n, n)
-  override def getRandomNeighbour(node: Int): Int = {
-    val connectedActors = connectedNetwork(node)
-    val random = scala.util.Random
-    var randomIndex = random.nextInt(connectedActors.length)
-    while (connectedActors(randomIndex) == true) {
-      randomIndex = random.nextInt(connectedActors.length)
+  override def getListOfNeighbours(node: Int): Array[Int] = {
+    val neighbours = Array(n-1)
+    var j = 0
+    for(i <- 0 to n){
+      if(node != i){
+        neighbours(j) = i
+        j += 1
+      }
     }
-    connectedActors(randomIndex) = true
-    randomIndex
+    neighbours
   }
 }

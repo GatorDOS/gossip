@@ -36,7 +36,6 @@ class PushSum(actorNo: Int) extends Algorithm {
     if (previous != 0) {
       var diff:BigDecimal =  previous - sumEstimate()
       if (diff.compare(threshold) == -1) {
-        print("its inside it")
         count += 1
         if (count >= 3) {
           return true
