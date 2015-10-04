@@ -1,17 +1,20 @@
 package uf.edu.mebin.topology
 
-import com.sun.beans.decoder.FalseElementHandler
-import com.sun.org.apache.xpath.internal.operations.Neg
+import scala.collection.mutable.ListBuffer
+import scala.io.StdIn
 import scala.util.Random
 
-case class ImperfectThreeDGrid(n:Int) extends Network {
-  import scala.collection.mutable.ListBuffer
-  val connectedNetwork = Array.ofDim[Boolean](n, n, n)
+case class ImperfectThreeDGrid(totalNumOfNodes:Int) extends Network {
+  
+  var dimension = math.cbrt(totalNumOfNodes).toInt
+  /*println("Dimension :",dimension)
+  StdIn.readChar()*/
+  val connectedNetwork = Array.ofDim[Boolean](dimension, dimension, dimension)
   override def getListOfNeighbours(node: Int): List[Int] = {
     var neighbours = new ListBuffer[Int]()
-    var gridPhase:Int = node/(n/3) //To identify the plane in the 3d Grid
-    var row:Int = math.sqrt(n/3).toInt
-    var col:Int = math.sqrt(n/3).toInt
+    var gridPhase:Int = node/(dimension*dimension) //To identify the plane in the 3d Grid
+    var row:Int = dimension
+    var col:Int = dimension
     var curRow = math.ceil((node - (gridPhase*row*col-1)) / row.toDouble).toInt
     var curCol = node - ((gridPhase*row*col-1) + ((curRow-1)*row))
     /*println("Actor num is :",node)
@@ -54,15 +57,22 @@ case class ImperfectThreeDGrid(n:Int) extends Network {
       neighbours += (gridPhase*row*col-1) + ((curRow-1)*row) + curCol-1
       neighbours += (gridPhase*row*col-1) + ((curRow-1)*row) + curCol+1
     }
-    var totNodes = row*row*row
-    
-    val rand = new Random()
-    
+    println("The neighbours are " + neighbours)
+    val range = totalNumOfNodes
     var found:Boolean = true
+    val rand = new Random()
     while(found){
-      var ind = rand.nextInt(totNodes)
-      if(!neighbours.contains(ind)){
-        neighbours += ind
+      val ind = rand.nextInt(range)
+      if(ind>range)
+      {
+        println("##############################Exceeded##############################")
+        println("The random numbers:",ind)
+        StdIn.readInt()
+      }
+      if(neighbours.contains(ind%range)){
+      }
+      else{
+        neighbours += ind%range
         found = false
       }
     }

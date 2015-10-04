@@ -2,12 +2,14 @@ package uf.edu.mebin.topology
 import scala.collection.mutable.ListBuffer
 
 case class ThreeDGrid(n: Int) extends Network {
-  val connectedNetwork = Array.ofDim[Boolean](n, n, n)
+  
+  var dimension = math.cbrt(n).toInt
+  val connectedNetwork = Array.ofDim[Boolean](dimension, dimension, dimension)
   override def getListOfNeighbours(node: Int): List[Int] = {
     var neighbours = new ListBuffer[Int]()
-    var gridPhase:Int = node/(n/3) //To identify the plane in the 3d Grid
-    var row:Int = math.sqrt(n/3).toInt
-    var col:Int = math.sqrt(n/3).toInt
+    var gridPhase:Int = node/(dimension*dimension) //To identify the plane in the 3d Grid
+    var row:Int = dimension
+    var col:Int = dimension
     var curRow = math.ceil((node - (gridPhase*row*col-1)) / row.toDouble).toInt
     var curCol = node - ((gridPhase*row*col-1) + ((curRow-1)*row))
     /*println("Actor num is :",node)

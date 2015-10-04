@@ -16,25 +16,18 @@ import java.io.File
 class Worker(actorNo: Int, boss: ActorRef) extends Actor {
   var sent: Boolean = false
   var algo: Algorithm = null
+  var timeout = null
   val neighboursArray = DistibutedApp.networkTopologyInst.getListOfNeighbours(actorNo)
 
   def receive = {
-
+    case Stop => context.system.shutdown()
     case PushSumMsg =>
       algo = AlgoFactory.getInstance("push-sum", actorNo)
     case GossipMsg =>
-      println("Worker id is ", actorNo)
-      println("The neighbours are: ")
-      println(neighboursArray)
-      println()
       algo = AlgoFactory.getInstance("gossip", actorNo)
     case msg: Message =>
-      //println("Hey i was called",actorNo)
       processMessage(algo, msg)
       if (sent == false) {
-      //println("******************Message Received by worker actor "+actorNo.toString() + "******************")
-       /* val workerResult = new PrintWriter(new File("worker.txt" + actorNo))
-        workerResult.close()*/
        boss ! MessageReceived(actorNo)
         sent = true
       }
@@ -46,10 +39,14 @@ class Worker(actorNo: Int, boss: ActorRef) extends Actor {
       algo.receiveMessage(msg)
       if (algo.isTerminate() == true) {
 
-        if (boss != null)
+        if (boss != null){
           boss ! Stop
+          context.system.shutdown()
+        }
       }
+      
       var randomNeighbour = getRandomNeighbour(neighboursArray)
+      println("\nThe current worker is : ",actorNo)
       println("Neighbour selected ",neighboursArray(randomNeighbour))
       algo.send(workerActors.actors(neighboursArray(randomNeighbour)))
     } else
@@ -57,11 +54,7 @@ class Worker(actorNo: Int, boss: ActorRef) extends Actor {
   }
 
   def getRandomNeighbour(neighbours: List[Int]): Int = {
-    val rand = new Random()
-    println(neighbours.length)
-    var rando = rand.nextInt(neighbours.length)
-    println(neighbours)
-    println("The random index selected was ",rando)
+    var rando = new Random().nextInt(neighbours.length)
     rando
   }
 
@@ -70,7 +63,7 @@ class Worker(actorNo: Int, boss: ActorRef) extends Actor {
 object Worker {
   def start(n: Int, boss: ActorRef): Unit = {
     val system = ActorSystem() //"ClusterSystem", config
-    val workerActor = system.actorOf(Props(new Worker(n, boss)), name = "worker")
+    val workerActor = system.actorOf(Props(new Worker(n, boss)), name = "worker"+n)
     workerActor ! workerRegister
   }
 }
