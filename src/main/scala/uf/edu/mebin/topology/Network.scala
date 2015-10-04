@@ -9,5 +9,7 @@ trait Network {
    * @return: the random actor number
    */
   def getListOfNeighbours(node: Int): List[Int]
+  
+  def getNoOfNodes(): Int 
     
 }

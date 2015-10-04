@@ -8,13 +8,19 @@ import scala.collection.mutable.ListBuffer
 case class fullNetwork(n: Int) extends Network {
   //NxN matrix to store to whom all it can connect... 
   //val connectedNetwork = Array.ofDim[Boolean](n, n)
+  
+  override def getNoOfNodes(): Int = {
+    n
+  }
   override def getListOfNeighbours(node: Int): List[Int] = {
-    val neighbours = new ListBuffer[Int]()    
+    /*val neighbours = new ListBuffer[Int]()    
     for(i <- 0 to n-1){
       if(node != i){
         neighbours += i        
       }
     }
-    neighbours.toList
+    println("Sending Neighbours")
+    neighbours.toList*/
+    null
   }
 }

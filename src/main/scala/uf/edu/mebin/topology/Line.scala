@@ -4,6 +4,10 @@ import scala.collection.mutable.ListBuffer
 case class Line(n: Int) extends Network {
   val lineNetwork = Array.ofDim[Boolean](n)
 
+  override def getNoOfNodes(): Int = {
+    n
+  }
+  
   override def getListOfNeighbours(nodeNum: Int): List[Int] = {
     var listOfNeighb = new ListBuffer[Int]()
     val actor = lineNetwork(nodeNum)

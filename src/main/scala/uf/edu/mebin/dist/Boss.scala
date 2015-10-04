@@ -17,6 +17,7 @@ import akka.pattern.ask
 import akka.util.Timeout
 import uf.edu.mebin.topology.Network
 import akka.actor.PoisonPill
+import scala.io.StdIn
 /**
  * @author mebin
  */
@@ -36,6 +37,7 @@ class Boss(topology: Network, algo: String, noOfNodes: Int) extends Actor {
       backends(jobCounter % backends.size) forward job
 
     case BackendRegistration(num) if !backends.contains(sender()) =>
+      
       print("\n Registering to Backend, Worker: "+sender().path.name)
       context watch sender()
       workerActors.actors(num) = sender()
