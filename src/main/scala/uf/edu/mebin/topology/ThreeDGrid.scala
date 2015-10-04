@@ -20,12 +20,12 @@ case class ThreeDGrid(n: Int) extends Network {
     if (gridPhase == 0){
       neighbours += ((curRow-1)*row) + curCol      
     }
-    else if(gridPhase==2){
+    else if(gridPhase==row){
       neighbours += ((gridPhase-1)*row*col-1) + ((curRow-1)*row) + curCol      
     }
     else
     {
-      neighbours += ((curRow-1)*row) + curCol
+      neighbours += ((gridPhase-1)*row*col-1) + ((curRow-1)*row) + curCol
       neighbours += ((gridPhase+1)*row*col-1) + ((curRow-1)*row) + curCol
     }
     //For x & y
