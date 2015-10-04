@@ -63,7 +63,9 @@ class Worker(actorNo: Int, boss: ActorRef) extends Actor {
 object Worker {
   def start(n: Int, boss: ActorRef): Unit = {
     val system = ActorSystem() //"ClusterSystem", config
-    val workerActor = system.actorOf(Props(new Worker(n, boss)), name = "worker"+n)
-    workerActor ! workerRegister
+    for(workerNo <- 1 to n){
+      var workerActor = system.actorOf(Props(new Worker(workerNo - 1, boss)), name = "worker"+workerNo)  
+      workerActor ! workerRegister
+    }
   }
 }
