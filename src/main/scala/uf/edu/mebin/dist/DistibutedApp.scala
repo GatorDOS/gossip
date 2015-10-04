@@ -20,9 +20,10 @@ object DistibutedApp {
     val boss = Boss.start(Seq("2551",algorithm).toArray, networkTopologyInst, noOfNodes)  
 //    Boss.start(Seq("2552",algorithm).toArray, networkTopologyInst, noOfNodes)
     //Start the workers
-    for (x <- 1 to noOfNodes) {
+    /*for (x <- 1 to noOfNodes) {
       Worker.start(x-1, boss)
-    }
+    }*/
+    Worker.start(noOfNodes, boss)
 
   }
 
