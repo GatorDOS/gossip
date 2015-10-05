@@ -26,15 +26,15 @@ case class ThreeDGrid(n: Int) extends Network {
     }
     var curCol = node - ( (gridPhase-1)*row*row + diffRow )
     if (gridPhase == 1){
-      neighbours += node+16-1      
+      neighbours += node+(row*row)-1      
     }
     else if(gridPhase==row){
-      neighbours += node-16      
+      neighbours += node-(row*row)      
     }
     else
     {
-      neighbours += node-16
-      neighbours += node+16-1
+      neighbours += node-(row*row)
+      neighbours += node+(row*row)-1
     }
     //For x & y
     
@@ -65,6 +65,7 @@ case class ThreeDGrid(n: Int) extends Network {
     {
       if(neighbours(i)>=n)
       {
+        println(neighbours,node)
         println("Found smth fishy in neighbours for actor: ",node)
         StdIn.readChar()
       }

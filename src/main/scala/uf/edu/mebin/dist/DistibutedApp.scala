@@ -17,7 +17,19 @@ object DistibutedApp {
     val topology: String = args(1)
     val algorithm = args(2)
     networkTopologyInst = new NetworkFactory(topology).getInstance(noOfNodes)
-    val boss = Boss.start(Seq("2551",algorithm).toArray, networkTopologyInst, noOfNodes)  
+    
+    var killTime:Int = -1
+    var DiseasedNode: Int = -1
+    println("Args length is :",args.length)
+    if(args.length==5)
+    {
+       killTime = args(3).toInt
+       DiseasedNode = args(4).toInt
+     }
+    println("Kill Time is ",killTime)
+    println("Diseased Node is ", DiseasedNode)
+    
+    val boss = Boss.start(Seq("2551",algorithm).toArray, networkTopologyInst, noOfNodes, killTime, DiseasedNode)
     Worker.start(noOfNodes, boss)
   }
 

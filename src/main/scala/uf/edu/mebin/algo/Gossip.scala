@@ -20,6 +20,6 @@ class Gossip(actorNum:Int) extends Algorithm{
   }
   
   def isTerminate() = {
-    count >= 10
+    count >= 60
   }
 }

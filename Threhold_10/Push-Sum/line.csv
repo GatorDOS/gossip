@@ -1,0 +1,6 @@
+Size,Time,Nodes Contacted,Converged at Node
+10,15,3,1
+100,47,4,4
+1000,46,7,5
+10000,1551,3,1
+50000,31678,4,1

@@ -15,6 +15,7 @@ case object PushSumMsg
 case object GossipMsg
 case object Stop
 case object workerRegister
+case object StopMyActor
 case object Down
 case class MessageReceived(n: Int)
 case object Acknowledgment

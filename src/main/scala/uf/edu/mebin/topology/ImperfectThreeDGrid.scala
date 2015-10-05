@@ -29,18 +29,16 @@ case class ImperfectThreeDGrid(totalNumOfNodes:Int) extends Network {
       diffRow = (curRow-1)*row-1
     }
     var curCol = node - ( (gridPhase-1)*row*row + diffRow )
-    /*println(node, curRow ,curCol, gridPhase)
-    StdIn.readChar()*/  
     if (gridPhase == 1){
-      neighbours += node+16-1      
+      neighbours += node+(row*row)-1      
     }
     else if(gridPhase==row){
-      neighbours += node-16      
+      neighbours += node-(row*row)      
     }
     else
     {
-      neighbours += node-16
-      neighbours += node+16-1
+      neighbours += node-(row*row)
+      neighbours += node+(row*row)-1
     }
     //For x & y
     
