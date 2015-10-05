@@ -16,9 +16,9 @@ case object GossipMsg
 case object Stop
 case object workerRegister
 case object StopMyActor
-case object Down
+case object StateChange
 case class MessageReceived(n: Int)
-case object Acknowledgment
+
 object workerActors{
   lazy val actors: Array[ActorRef] = new Array(DistibutedApp.noOfNodes)
 }

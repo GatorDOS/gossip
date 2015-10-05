@@ -78,7 +78,7 @@ class Boss(topology: Network, algo: String, noOfNodes: Int, killTime:Int, Diseas
       }
       
     case MessageReceived(n) => 
-      println("Meessage received for actor:",n)
+      println("Message received for actor:",n)
       if (kTime>0){
         var ctime = System.currentTimeMillis()
         if(ctime-startTime>kTime){
@@ -87,7 +87,7 @@ class Boss(topology: Network, algo: String, noOfNodes: Int, killTime:Int, Diseas
       pw.close
           
           kTime = -1
-          workerActors.actors(DiseasedNode) ! StopMyActor          
+          workerActors.actors(DiseasedNode) ! StateChange          
         }
       }
       println(s"**************Message received from $n ****************\n")

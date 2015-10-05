@@ -18,6 +18,7 @@ class Worker(actorNo: Int, boss: ActorRef) extends Actor {
   var sent: Boolean = false
   var algo: Algorithm = null
   var timeout = null
+  var alive: Boolean = true
   val totNoNodes: Int = DistibutedApp.networkTopologyInst.getNoOfNodes()
   val neighboursArray = DistibutedApp.networkTopologyInst.getListOfNeighbours(actorNo)
 
@@ -29,35 +30,23 @@ class Worker(actorNo: Int, boss: ActorRef) extends Actor {
     case GossipMsg =>
       algo = AlgoFactory.getInstance("gossip", actorNo)
 
+    case StateChange =>
+      alive = false
+
     case msg: Message =>
-      sender ! Acknowledgment
-      processMessage(algo, msg)
-      implicit val ec = context.dispatcher
-      val timeout = context.system.scheduler.
-        scheduleOnce(1.second, self, Down)
-      context become waitingForAck(sender, timeout, msg)
-      if (sent == false) {
-        boss ! MessageReceived(actorNo)
-        sent = true
+      if (alive == true) {
+        processMessage(algo, msg)
+        if (sent == false) {
+          boss ! MessageReceived(actorNo)
+          sent = true
+        }
+      } 
+      else {
+        println("I am dead")
+        boss ! Stop
       }
 
     case workerRegister => boss ! BackendRegistration(actorNo)
-
-  }
-
-  private def waitingForAck(origin: ActorRef, timeout: Cancellable, msg: Message): Receive = LoggingReceive {
-      case Acknowledgment =>
-        println("Hey m here Ack")
-        timeout.cancel()
-        context become receive
-      case Down =>
-        println("Hey m here Down")
-        var sendBy = sender.path.name
-        println(sendBy.length(), sendBy)
-        var neighbour = sendBy.subSequence(6, sendBy.length)
-        println(neighbour)
-        StdIn.readChar()
-        self ! msg
 
   }
 
